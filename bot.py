@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 import os
+import os
 import threading
-import telebot
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from pymongo import MongoClient
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 # --- CONFIGURATION ---
 BOT_TOKEN = "8905382319:AAF21E4c6NknQGF4OoApB2BQuNmSGxc4MLI"
-MONGO_URI = "mongodb+srv://jickyjoly2020ptn_db_user:Gjs8K6RCh8PASscG@cluster0.uiuftrc.mongodb.net/?appName=Cluster0"
+MONGO_URI = "mongodb+srv://botuser:<noVWoqQYdwDk5e4A>@cluster0.uiuftrc.mongodb.net/?appName=Cluster0"
 
 bot = telebot.TeleBot(BOT_TOKEN)
 client = MongoClient(MONGO_URI)
