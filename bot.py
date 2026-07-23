@@ -7,7 +7,7 @@ from pymongo import MongoClient
 import certifi
 
 # === သတ်မှတ်ချက်များ တန်းထည့်ရန် ===
-BOT_TOKEN = "8959345427:AAHxo6_tKFFS2y17fgE6QK9gi6Q8sZ7MUIU"  # သင့် Bot Token
+BOT_TOKEN = "8660308040:AAE6lpF3KWATEtnXutFKxJTqa8kiQ-AGVB0"  # သင့် Bot Token
 WEBAPP_URL = "https://my-movie-bot-1-b4dy.onrender.com"  # သင့် Render Web URL
 ADMIN_IDS = [2043111276]  # သင့် Telegram User ID (ဂဏန်းသက်သက်)
 MONGO_URI = "mongodb+srv://botuser:<noVWoqQYdwDk5e4A>@cluster0.uiuftrc.mongodb.net/?appName=Cluster0"  # သင့် MongoDB URI
