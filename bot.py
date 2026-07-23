@@ -109,5 +109,6 @@ def callback_show_list_again(call):
     show_episode_buttons(call.message.chat.id, series_name)
 
 print("Series Movie Bot is running...")
+bot.delete_webhook()
 bot.polling(none_stop=True)
                             
