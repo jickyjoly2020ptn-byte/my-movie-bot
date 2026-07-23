@@ -105,4 +105,9 @@ if __name__ == "__main__":
         port=port,
         url_path=BOT_TOKEN
     )
-    
+    import os
+
+# ပြင်ရမည့်ပုံစံ (စာသားတွေ တိုက်ရိုက် မထည့်ပါနဲ့တော့)
+BOT_TOKEN = os.environ.get('8959345427:AAHxo6_tKFFS2y17fgE6QK9gi6Q8sZ7MUIU')
+WEBAPP_URL = os.environ.get('https://my-movie-bot-1-b4dy.onrender.com') 
+
