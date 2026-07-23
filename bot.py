@@ -7,7 +7,7 @@ from pymongo import MongoClient
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 # --- CONFIGURATION ---
-BOT_TOKEN = "8905382319:AAE_a00ItrzKztZyGs2V2clwogLDewraFtQ"
+BOT_TOKEN = "8905382319:AAF21E4c6NknQGF4OoApB2BQuNmSGxc4MLI"
 MONGO_URI = "mongodb+srv://jickyjoly2020ptn_db_user:Gjs8K6RCh8PASscG@cluster0.uiuftrc.mongodb.net/?appName=Cluster0"
 
 bot = telebot.TeleBot(BOT_TOKEN)
