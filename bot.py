@@ -3,8 +3,7 @@ import threading
 from pymongo import MongoClient
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-BOT_TOKEN =
-"8905382319:AAE_a00ItrzKztZyGs2V2clwogLDewraFtQ"
+BOT_TOKEN = "8905382319:AAE_a00ItrzKztZyGs2V2clwogLDewraFtQ"
 
 bot = telebot.TeleBot(BOT_TOKEN)
 
