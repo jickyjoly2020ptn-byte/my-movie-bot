@@ -102,6 +102,56 @@ def handle_show_list_again(call):
     show_episode_buttons(call.message.chat.id, movie_keyword)
 
 # --- BOT RUNNING ---
+@bot.message_handler(commands=['addmovie'])
+def handle_add_movie(message):
+    """ ဖုန်းထဲကနေ ဇာတ်ကားနှင့် အပိုင်းများကို Database ထဲ တိုက်ရိုက်လှမ်းထည့်မည့် Command """
+    if message.from_user.id == ADMIN_ID:
+        text = (
+            "📝 **ဇာတ်ကားအသစ်တင်ရန် အောက်ပါပုံစံအတိုင်း စာသားကို အတိအကျ ပြန်ပို့ပေးပါ -**\n\n"
+            "`/save [keyword] [ဇာတ်ကားအမည်] [အပိုင်းနာမည်] [File_ID]`\n\n"
+            "💡 **ဥပမာ -**\n"
+            "`/save avatar Avatar_The_Last_Airbender ep1 123456_file_id_အရှည်ကြီး`"
+        )
+        bot.send_message(message.chat.id, text, parse_mode="Markdown")
+
+@bot.message_handler(commands=['save'])
+def handle_save_movie(message):
+    if message.from_user.id == ADMIN_ID:
+        try:
+            # စာသားကို ပိုင်းဖြတ်မည်
+            parts = message.text.split(maxsplit=4)
+            if len(parts) < 5:
+                bot.reply_to(message, "❌ ပုံစံမမှန်ပါ။ စာသား အပြည့်အစုံ ထည့်ပေးပါ။")
+                return
+                
+            _, keyword, title, ep_name, video_file_id = parts
+            keyword = keyword.lower()
+            
+            # Database ထဲ သွားသိမ်းမည် (ရှိပြီးသားဆိုလျှင် အပိုင်းအသစ် ထပ်တိုးမည်)
+            collection.update_one(
+                {"keyword": keyword},
+                {
+                    "$set": {"title": title.replace("_", " ")},
+                    "$set": {f"episodes.{ep_name}": video_file_id}
+                },
+                upsert=True
+            )
+            bot.reply_to(message, f"✅ ဇာတ်ကား တင်လို့ အောင်မြင်သွားပါပြီ။\n🔗 လင့်ခ် - `https://t.me်းရဲ့_Bot_Username?start={keyword}`")
+        except Exception as e:
+            bot.reply_to(message, f"❌ Error တက်သွားပါသည် - {e}")
+
+@bot.message_handler(content_types=['video', 'document'])
+def handle_get_file_id(message):
+    """ Bot ထဲ ဗီဒီယိုဖိုင် ပို့လိုက်ရုံဖြင့် File ID ကို Admin တစ်ဦးတည်းဆီ ပြန်ထုတ်ပေးမည့်စနစ် """
+    if message.from_user.id == ADMIN_ID:
+        file_id = ""
+        if message.content_type == 'video':
+            file_id = message.video.file_id
+        elif message.content_type == 'document':
+            file_id = message.document.file_id
+            
+        bot.reply_to(message, f"📋 **ဒီဗီဒီယိုရဲ့ File ID ဖြစ်ပါတယ် (Copy ယူပါ) -**\n\n`{file_id}`")
+        
 if __name__ == "__main__":
     print("Auto-Delete Movie Bot is running...")
     bot.delete_webhook()  
