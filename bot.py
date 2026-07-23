@@ -3,7 +3,9 @@ import threading
 from pymongo import MongoClient
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-BOT_TOKEN = "8660308040:AAFk1-p6xEjZ-PnELHnrI4s5LS3s0BNzllM"
+BOT_TOKEN =
+"8905382319:AAE_a00ItrzKztZyGs2V2clwogLDewraFtQ"
+
 bot = telebot.TeleBot(BOT_TOKEN)
 
 MONGO_URI = "mongodb+srv://jickyjoly2020ptn_db_user:<Gjs8K6RcH8PASScG>@cluster0.uiuftrc.mongodb.net/?appName=Cluster0"
@@ -109,6 +111,5 @@ def callback_show_list_again(call):
     show_episode_buttons(call.message.chat.id, series_name)
 
 print("Series Movie Bot is running...")
-bot.delete_webhook()
 bot.polling(none_stop=True)
-                            
+        
