@@ -108,6 +108,51 @@ def callback_show_list_again(call):
     try: bot.delete_message(call.message.chat.id, call.message.message_id)
     except: pass
     show_episode_buttons(call.message.chat.id, series_name)
+import os
+import telebot
+from flask import Flask, request
 
+# သင့် Bot Token ကို Environment Variable ထဲက ယူပါ
+BOT_TOKEN = os.environ.get('8959345427:AAGjpb-AHuY_XCyyXkiCJnZkrorSybAvzEo')
+BOT = telebot.TeleBot(BOT_TOKEN)
+
+# Render က ပေးမယ့် Web Service URL (ဥပမာ- https://onrender.com)
+# Render ရဲ့ Environment Variables ထဲမှာ RENDER_EXTERNAL_URL ဆိုပြီး ထည့်ပေးထားရပါမယ်
+WEBAPP_URL = os.environ.get('https://dashboard.render.com/web/new') 
+
+app = Flask(__name__)
+
+@app.route('/' + BOT_TOKEN, methods=['POST'])
+def getMessage():
+    """ Telegram က ပို့လိုက်တဲ့ Update တွေကို လက်ခံတဲ့ နေရာ """
+    json_string = request.get_data().decode('utf-8')
+    update = telebot.types.Update.de_json(json_string)
+    BOT.process_new_updates([update])
+    return "!", 200
+
+@app.route("/")
+def webhook_setting():
+    """ Render ရဲ့ Port Error ကို ကျော်ဖို့နှင့် Webhook Status စစ်ရန် Dummy Route """
+    BOT.remove_webhook()
+    BOT.set_webhook(url=f"{WEBAPP_URL}/{BOT_TOKEN}")
+    return "Webhook set successfully! Bot is running.", 200
+
+# === သင်ရေးချင်တဲ့ Bot Command များကို ဒီအောက်မှာ ဆက်ရေးပါ ===
+
+@BOT.message_handler(commands=['start'])
+def send_welcome(message):
+    BOT.reply_to(message, "မင်္ဂလာပါ! ကျွန်တော်က Webhook နဲ့ အလုပ်လုပ်နေတဲ့ Bot ပါ။")
+
+@BOT.message_handler(func=lambda message: True)
+def echo_all(message):
+    BOT.reply_to(message, message.text)
+
+# ========================================================
+
+if __name__ == "__main__":
+    # Render အတွက် Port Binding လုပ်ခြင်း (Error မတက်အောင် မဖြစ်မနေ လိုအပ်ပါတယ်)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host="0.0.0.0", port=port)
+    
 print("Series Movie Bot is running...")
 bot.polling(none_stop=True)
