@@ -1,158 +1,110 @@
-import telebot
-import threading
-from pymongo import MongoClient
-from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
-
-BOT_TOKEN= "8959345427:AAGjpb-AHuY_XCyyXkiCJnZkrorSybAvzEo"
-
-bot = telebot.TeleBot(BOT_TOKEN)
-
-MONGO_URI = "mongodb+srv://botuser:<noVWoqQYdwDk5e4A>@cluster0.uiuftrc.mongodb.net/?appName=Cluster0"
-client = MongoClient(MONGO_URI)
-db = client['movie_bot_db']
-series_collection = db['series_movies']
-
-ADMIN_ID = 2043111276  # သင့် Telegram ID ထည့်ပါ
-
-# ၁။ Admin က ဇာတ်လမ်းတွဲ အပိုင်းများကို Bot ထဲသို့ လှမ်းသိမ်းသည့်စနစ်
-@bot.message_handler(content_types=['video', 'document'], func=lambda message: message.from_user.id == ADMIN_ID)
-def save_series(message):
-    file_id = message.video.file_id if message.content_type == 'video' else message.document.file_id
-    sent_msg = bot.reply_to(message, "ဒီဖိုင်အတွက် ဒေတာကို `ဇာတ်လမ်းအမည်:အပိုင်းနာမည်` ပုံစံရိုက်ပေးပါ။\n(ဥပမာ - `breakingbad:ep1` သို့မဟုတ် `naruto:ep5`)")
-    bot.register_next_step_handler(sent_msg, process_series_save, file_id)
-
-def process_series_save(message, file_id):
-    try:
-        series_name, episode_name = message.text.strip().lower().split(':')
-        
-        # ဒေတာဘေ့စ်ထဲတွင် ဇာတ်လမ်းအမည်အောက်၌ အပိုင်းများကို စုစည်းသိမ်းဆည်းခြင်း
-        series_collection.update_one(
-            {"series_name": series_name},
-            {"$set": {f"episodes.{episode_name}": file_id}},
-            upsert=True
-        )
-        bot.reply_to(message, f"✅ သိမ်းဆည်းမှု အောင်မြင်ပါပြီ။\n\nChannel တွင် တင်ရမည့် လင့်ခ် -\n`https://t.me{bot.get_me().username}?start={series_name}`")
-    except ValueError:
-        bot.reply_to(message, "❌ ပုံစံမှားနေပါသည်။ `ဇာတ်လမ်းအမည်:အပိုင်းနာမည်` ပုံစံအတိုင်း ပြန်ပို့ပေးပါ။")
-
-# ၂။ ဗီဒီယိုဖိုင်ကို ဖျက်ပြီး ခလုတ်ပြန်ပြောင်းပေးမည့် စနစ်
-def auto_delete_and_replace(chat_id, message_id, series_name):
-    try:
-        bot.delete_message(chat_id, message_id)
-        
-        markup = InlineKeyboardMarkup()
-        markup.add(InlineKeyboardButton(text="🔄 GET FILE AGAIN!", callback_data=f"list_{series_name}"))
-        
-        bot.send_message(
-            chat_id, 
-            "━━━━━━━━━━━━━━━━━━━━━━\n"
-            "⚠️ YOUR VIDEO / FILE IS SUCCESSFULLY DELETED !!\n\n"
-            "ဗီဒီယိုဖိုင်ကို မူပိုင်ခွင့်အရ ဖြတ်တောက်ပစ်လိုက်ပါပြီ။\n"
-            "ဇာတ်လမ်းတွဲ အပိုင်းများကို ပြန်ကြည့်ရန် အောက်က ခလုတ်ကို နှိပ်ပါ။\n"
-            "━━━━━━━━━━━━━━━━━━━━━━", 
-            reply_markup=markup
-        )
-    except Exception as e:
-        print("Error in auto-delete:", e)
-
-# ၃။ Channel ကလင့်ခ်ကို နှိပ်ပြီး ဝင်လာလျှင် Episode ခလုတ်အားလုံး ပြသပေးသည့်စနစ်
-@bot.message_handler(commands=['start'])
-def handle_start(message):
-    args = message.text.split()
-    if len(args) > 1:
-        series_name = args[1].lower()
-        show_episode_buttons(message.chat.id, series_name)
-    else:
-        bot.send_message(message.chat.id, "👋 မင်္ဂလာပါ။ ရုပ်ရှင်ကြည့်ရန် Channel ထဲက လင့်ခ်ကို နှိပ်ဝင်ပေးပါ။")
-
-# အပိုင်းအားလုံးကို ခလုတ်ပြပေးမည့် Function
-def show_episode_buttons(chat_id, series_name):
-    series_data = series_collection.find_one({"series_name": series_name})
-    
-    if series_data and "episodes" in series_data:
-        markup = InlineKeyboardMarkup()
-        episodes = series_data["episodes"]
-        
-        # အပိုင်းများကို ခလုတ်များအဖြစ် ပြောင်းလဲခြင်း
-        # (ဥပမာ ခလုတ်တစ်ခုကို နှိပ်လျှင် play_breakingbad_ep1 ဟု အလုပ်လုပ်မည်)
-        for ep_name in sorted(episodes.keys()):
-            btn = InlineKeyboardButton(text=f"🍿 {ep_name.upper()}", callback_data=f"play_{series_name}_{ep_name}")
-            markup.add(btn)
-            
-        bot.send_message(chat_id, f"🎬 **{series_name.upper()}** ဇာတ်လမ်းတွဲ၏ ကြည့်ရှုလိုသော အပိုင်းကို ရွေးချယ်ပါ -", reply_markup=markup, parse_mode="Markdown")
-    else:
-        bot.send_message(chat_id, "❌ ဤဇာတ်လမ်းတွဲ သို့မဟုတ် အပိုင်းများကို ရှာမတွေ့သေးပါ။")
-
-# ၄။ အသုံးပြုသူက Episode ခလုတ်တစ်ခုခုကို နှိပ်လိုက်လျှင် ဗီဒီယိုပို့ပေးပြီး Timer မောင်းနှင်ခြင်း
-@bot.callback_query_handler(func=lambda call: call.data.startswith('play_'))
-def callback_play_video(call):
-    # data ပုံစံ - play_seriesname_epname
-    _, series_name, ep_name = call.data.split('_')
-    series_data = series_collection.find_one({"series_name": series_name})
-    
-    if series_data and ep_name in series_data["episodes"]:
-        video_id = series_data["episodes"][ep_name]
-        
-        # ခလုတ်စာရင်းဟောင်းကို အရင်ဖျက်သည်
-        try: bot.delete_message(call.message.chat.id, call.message.message_id)
-        except: pass
-        
-        # ဗီဒီယိုပို့ပြီး ၅ မိနစ် (စက္ကန့် ၃၀၀) အကြာတွင် ဖျက်ရန် စီစဉ်ခြင်း
-        sent_video = bot.send_video(call.message.chat.id, video_id, caption=f"🍿 {series_name.upper()} - {ep_name.upper()}\n\n⚠️ ဤဗီဒီယိုသည် ၅ မိနစ်အတွင်း အလိုအလျောက် ပျက်သွားပါမည်။")
-        threading.Timer(300, auto_delete_and_replace, args=[call.message.chat.id, sent_video.message_id, series_name]).start()
-
-# ၅။ "GET FILE AGAIN!" သို့မဟုတ် စာရင်းပြန်တောင်းလျှင် ခလုတ်များ ပြန်ပြပေးခြင်း
-@bot.callback_query_handler(func=lambda call: call.data.startswith('list_'))
-def callback_show_list_again(call):
-    _, series_name = call.data.split('_')
-    try: bot.delete_message(call.message.chat.id, call.message.message_id)
-    except: pass
-    show_episode_buttons(call.message.chat.id, series_name)
 import os
 import telebot
-from flask import Flask, request
+import threading
+import time
+import re
+from pymongo import MongoClient
+import certifi
 
-# သင့် Bot Token ကို Environment Variable ထဲက ယူပါ
-BOT_TOKEN = os.environ.get('8959345427:AAGjpb-AHuY_XCyyXkiCJnZkrorSybAvzEo')
-BOT = telebot.TeleBot(BOT_TOKEN)
+# === သတ်မှတ်ချက်များ ထည့်ရန် ===
+BOT_TOKEN = "8959345427:AAGjpb-AHuY_XCyyXkiCJnZkrorSybAvzEo"
+# ဥပမာ - [12345678, 98765432] (သင့် Telegram User ID ကို ထည့်ပါ၊ တစ်ဦးထက်ပို၍ ထည့်နိုင်သည်)
+ADMIN_IDS = [2043111276] 
 
-# Render က ပေးမယ့် Web Service URL (ဥပမာ- https://onrender.com)
-# Render ရဲ့ Environment Variables ထဲမှာ RENDER_EXTERNAL_URL ဆိုပြီး ထည့်ပေးထားရပါမယ်
-WEBAPP_URL = os.environ.get('https://dashboard.render.com/web/new') 
+# MongoDB Connection String (ဥပမာ - mongodb+srv://...)
+MONGO_URI = "mongodb+srv://botuser:<noVWoqQYdwDk5e4A>@cluster0.uiuftrc.mongodb.net/?appName=Cluster0"
 
-app = Flask(__name__)
+# ဗီဒီယို ပြန်ဖျက်ရန် အချိန် (စက္ကန့်ဖြင့်) - ၅ မိနစ် = ၃၀၀ စက္ကန့်
+DELETE_AFTER_SECONDS = 300
 
-@app.route('/' + BOT_TOKEN, methods=['POST'])
-def getMessage():
-    """ Telegram က ပို့လိုက်တဲ့ Update တွေကို လက်ခံတဲ့ နေရာ """
-    json_string = request.get_data().decode('utf-8')
-    update = telebot.types.Update.de_json(json_string)
-    BOT.process_new_updates([update])
-    return "!", 200
+# === ပြင်ဆင်မှုများ စတင်ခြင်း ===
+bot = telebot.TeleBot(BOT_TOKEN)
 
-@app.route("/")
-def webhook_setting():
-    """ Render ရဲ့ Port Error ကို ကျော်ဖို့နှင့် Webhook Status စစ်ရန် Dummy Route """
-    BOT.remove_webhook()
-    BOT.set_webhook(url=f"{WEBAPP_URL}/{BOT_TOKEN}")
-    return "Webhook set successfully! Bot is running.", 200
+# MongoDB ချိတ်ဆက်ခြင်း
+client = MongoClient(MONGO_URI, tlsCAFile=certifi.where())
+db = client['telegram_movie_bot']
+movies_collection = db['movies']
 
-# === သင်ရေးချင်တဲ့ Bot Command များကို ဒီအောက်မှာ ဆက်ရေးပါ ===
+# နောက်ကွယ်မှ အလိုအလျောက် ဖျက်ပေးမည့် Function
+def auto_delete(chat_id, message_id, delay):
+    time.sleep(delay)
+    try:
+        bot.delete_message(chat_id, message_id)
+    except Exception as e:
+        print(f"Error deleting message: {e}")
 
-@BOT.message_handler(commands=['start'])
+# /start Command
+@bot.message_handler(commands=['start'])
 def send_welcome(message):
-    BOT.reply_to(message, "မင်္ဂလာပါ! ကျွန်တော်က Webhook နဲ့ အလုပ်လုပ်နေတဲ့ Bot ပါ။")
+    welcome_text = (
+        "👋 မင်္ဂလာပါ! ရုပ်ရှင်နှင့် ဇာတ်လမ်းတွဲများ တောင်းနိုင်တဲ့ Bot ပါ။\n\n"
+        "🔍 ရုပ်ရှင်အမည်ကို အင်္ဂလိပ်လို (သို့မဟုတ်) စာလုံးအချို့ ရိုက်ပြီး ရှာဖွေနိုင်ပါတယ်။\n"
+        f"⚠️ သတိပေးချက် - မူပိုင်ခွင့်ကြောင့် ပို့ပေးတဲ့ ဗီဒီယိုဖိုင်ဟာ **{int(DELETE_AFTER_SECONDS / 60)} မိနစ်** အတွင်း အလိုအလျောက် ပြန်ပျက်သွားပါမယ်။"
+    )
+    bot.reply_to(message, welcome_text, parse_mode="Markdown")
 
-@BOT.message_handler(func=lambda message: True)
-def echo_all(message):
-    BOT.reply_to(message, message.text)
-
-# ========================================================
-
-if __name__ == "__main__":
-    # Render အတွက် Port Binding လုပ်ခြင်း (Error မတက်အောင် မဖြစ်မနေ လိုအပ်ပါတယ်)
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host="0.0.0.0", port=port)
+# === ADMIN စနစ် - ရုပ်ရှင်အသစ် သိမ်းဆည်းခြင်း ===
+# Admin က ဗီဒီယိုကို Caption ထည့်ပြီး ပို့လိုက်လျှင် Database ထဲသို့ တန်းသိမ်းမည်။
+@bot.message_handler(content_types=['video'], func=lambda message: message.from_user.id in ADMIN_IDS)
+def add_movie_by_admin(message):
+    if not message.caption:
+        bot.reply_to(message, "❌ ကျေးဇူးပြု၍ ဗီဒီယို ပို့သည့်အခါ Caption တွင် ရုပ်ရှင်အမည်ကိုပါ တစ်ခါတည်း ရိုက်ထည့်ပေးပါ။")
+        return
     
-print("Series Movie Bot is running...")
-bot.polling(none_stop=True)
+    movie_name = message.caption.lower().strip()
+    file_id = message.video.file_id
+    
+    # MongoDB ထဲတွင် အဟောင်းရှိမရှိစစ်ပြီး အသစ်ထည့်/မွမ်းမံခြင်း
+    movies_collection.update_one(
+        {"movie_name": movie_name},
+        {"$set": {"file_id": file_id}},
+        upsert=True
+    )
+    bot.reply_to(message, f"✅ ရုပ်ရှင် **'{movie_name.upper()}'** ကို Database ထဲသို့ အောင်မြင်စွာ ထည့်သွင်းပြီးပါပြီ။")
+
+# === USER စနစ် - စာရိုက်၍ ရုပ်ရှင်ရှာဖွေခြင်း ===
+@bot.message_handler(func=lambda message: True)
+def search_and_send_movie(message):
+    user_query = message.text.lower().strip()
+    chat_id = message.chat.id
+    
+    # စာလုံးအချို့ ပါဝင်ရုံဖြင့် ရှာဖွေနိုင်ရန် Regex သုံးခြင်း
+    # ဥပမာ - "spider" ဟု ရိုက်လျှင် "spider-man 1", "the amazing spider-man" အကုန်ထွက်လာမည်။
+    query_regex = re.compile(user_query, re.IGNORECASE)
+    results = list(movies_collection.find({"movie_name": {"$regex": query_regex}}))
+    
+    if results:
+        # ရှာဖွေမှု အဆင်ပြေစေရန် ပထမဆုံးတွေ့သော ရလဒ်ကို အရင်ပို့ပေးခြင်း
+        # (ရလဒ်များစွာ ပြလိုပါက List အနေဖြင့် ပြုပြင်နိုင်သည်)
+        movie_data = results[0]
+        actual_name = movie_data['movie_name']
+        file_id = movie_data['file_id']
+        
+        status_msg = bot.send_message(chat_id, f"🎬 '{actual_name.upper()}' ကို ရှာတွေ့ပါပြီ။ Inbox သို့ ပို့ပေးနေပါတယ်...")
+        
+        movie_msg = bot.send_video(
+            chat_id=chat_id, 
+            video=file_id, 
+            caption=f"🍿 **{actual_name.upper()}**\n\n⚠️ ဤဗီဒီယိုသည် {int(DELETE_AFTER_SECONDS / 60)} မိနစ်အတွင်း အလိုအလျောက် ပျက်သွားပါမည်။"
+        )
+        
+        try:
+            bot.delete_message(chat_id, status_msg.message_id)
+        except:
+            pass
+            
+        # အချိန်ပြည့်လျှင် ဗီဒီယိုဖိုင်ကို ပြန်ဖျက်ရန် Thread စတင်ခြင်း
+        threading.Thread(target=auto_delete, args=(chat_id, movie_msg.message_id, DELETE_AFTER_SECONDS)).start()
+        
+    else:
+        bot.send_message(chat_id, "❌ စိတ်မရှိပါနဲ့၊ သင်တောင်းဆိုတဲ့ ရုပ်ရှင်ကို စာရင်းထဲမှာ ရှာမတွေ့သေးပါဘူး။")
+
+@bot.message_handler(content_types=['video'])
+def get_file_id(message):
+    print("Video File ID is:", message.video.file_id)
+        
+if __name__ == "__main__":
+    print("Bot is running with MongoDB...")
+    bot.infinity_polling()
+
+    
