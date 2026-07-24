@@ -7,7 +7,7 @@ from pymongo import MongoClient
 import certifi
 
 # === အချက်အလက်များ တန်းထည့်ရန် ===
-BOT_TOKEN = "8905382319:AAEqSc_82vcVNbC-sDV4CZ5WzXtvZbnwyMM"
+BOT_TOKEN = "8905382319:AAGCLUAZbAnspMuUTXxcFgW9b5Z3OW0NtpM"
 WEBAPP_URL = "https://onrender.com"
 ADMIN_IDS = [2043111276]
 MONGO_URI = "mongodb://botuser:jickymovie2026@ac-8w9cptn-shard-00-00.uluftrc.mongodb.net:27017,ac-8w9cptn-shard-00-01.uluftrc.mongodb.net:27017,ac-8w9cptn-shard-00-02.uluftrc.mongodb.net:27017/?ssl=true&replicaSet=atlas-m0wsp6-shard-00&authSource=admin&retryWrites=true&w=majority&appName=Cluster0"
