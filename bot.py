@@ -6,11 +6,11 @@ import re
 import uuid
 from pymongo import MongoClient
 import certifi
-from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 # === အချက်အလက်များ တန်းထည့်ရန် ===
-BOT_TOKEN = "8038762572:AAF9CE1CyYckhYufIix8yxYLx81XxZ0XXes"
-ADMIN_IDS = [2043111276]
+BOT_TOKEN = "8038762572:AAF9CE1CyYckhYufIix8yxYLx81XxZ0XXes" 
+WEBAPP_URL = "https://onrender.com"  # သင့် Render URL အမှန်
+ADMIN_IDS = [2043111276]  # သင့် Telegram User ID ဂဏန်း
 MONGO_URI = "mongodb://botuser:jickymovie2026@ac-8w9cptn-shard-00-00.uluftrc.mongodb.net:27017,ac-8w9cptn-shard-00-01.uluftrc.mongodb.net:27017,ac-8w9cptn-shard-00-02.uluftrc.mongodb.net:27017/?ssl=true&replicaSet=atlas-m0wsp6-shard-00&authSource=admin&retryWrites=true&w=majority&appName=Cluster0"
 
 DELETE_AFTER_SECONDS = 300 
@@ -22,10 +22,8 @@ movies_collection = db['movies']
 
 def auto_delete(chat_id, message_id, delay):
     time.sleep(delay)
-    try: 
-        bot.delete_message(chat_id, message_id)
-    except: 
-        pass
+    try: bot.delete_message(chat_id, message_id)
+    except: pass
 
 # === USER စနစ် ===
 @bot.message_handler(commands=['start'])
@@ -34,7 +32,7 @@ def send_welcome(message):
     command_args = message.text.split()
     
     if len(command_args) > 1:
-        search_key = command_args
+        search_key = command_args[1]
         
         direct_data = movies_collection.find_one({"movie_key": search_key})
         if direct_data:
@@ -43,12 +41,12 @@ def send_welcome(message):
             
         series_results = list(movies_collection.find({"series_key": search_key}).sort("episode_no", 1))
         if series_results:
-            main_title = series_results['movie_name'].upper()
-            markup = InlineKeyboardMarkup()
+            main_title = series_results[0]['movie_name'].upper()
+            markup = telebot.types.InlineKeyboardMarkup()
             
             row = []
             for ep_data in series_results:
-                btn = InlineKeyboardButton(text=f"🎞️ Ep {ep_data['episode_no']}", callback_data=f"ep_{ep_data['movie_key']}")
+                btn = telebot.types.InlineKeyboardButton(text=f"🎞️ Ep {ep_data['episode_no']}", callback_data=f"ep_{ep_data['movie_key']}")
                 row.append(btn)
                 if len(row) == 2:
                     markup.row(*row)
@@ -70,7 +68,7 @@ def send_welcome(message):
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('ep_'))
 def handle_episode_button(call):
-    movie_key = call.data.split('_')
+    movie_key = call.data.split('_')[1]
     movie_data = movies_collection.find_one({"movie_key": movie_key})
     if movie_data:
         bot.answer_callback_query(call.id, text="ဗီဒီယို ပို့ပေးနေပါပြီ...")
@@ -89,10 +87,8 @@ def send_movie_file(chat_id, movie_data):
         video=movie_data['file_id'], 
         caption=f"🍿 **{caption_title}**\n\n⚠️ ဤဗီဒီယိုသည် {int(DELETE_AFTER_SECONDS / 60)} မိနစ်အတွင်း အလိုအလျောက် ပျက်သွားပါမည်။"
     )
-    try: 
-        bot.delete_message(chat_id, status_msg.message_id)
-    except: 
-        pass
+    try: bot.delete_message(chat_id, status_msg.message_id)
+    except: pass
     threading.Thread(target=auto_delete, args=(chat_id, movie_msg.message_id, DELETE_AFTER_SECONDS)).start()
 
 # === ADMIN စနစ် ===
@@ -108,14 +104,12 @@ def add_movie_by_video(message):
     )
     bot.reply_to(message, id_reply, parse_mode="Markdown")
 
-# စာကြောင်းအောက်ဆင်းသော်လည်း ရှေ့ဆုံးတစ်လိုင်းကိုပဲ တိတိကျကျ ဖြတ်ဖတ်ပေးမည့် စနစ် (Indentation Error လုံးဝမရှိအောင် ပြင်ဆင်ထားပါသည်)
+# Enter ခေါက်ပြီး စာကြောင်းအောက်ဆင်းသမျှ စာတန်းရှည်ကြီးတွေပါ အကုန်ဖတ်မည့်စနစ်
 @bot.message_handler(func=lambda message: message.from_user.id in ADMIN_IDS and message.text.strip().startswith("add_mov:"))
 def add_movie_by_text(message):
     try:
-        full_text = message.text.strip()
-        first_line = full_text.split('\n')[0].strip()
-        actual_content = first_line[8:].strip()
-        file_id, caption_text = actual_content.split("|", 1)
+        clean_text = message.text.strip()[8:].strip()
+        file_id, caption_text = clean_text.split("|", 1)
         process_and_save_movie(message, file_id.strip(), caption_text.strip())
     except:
         bot.reply_to(message, "❌ ပုံစံမှားနေပါသည်။ ရိုက်ရမည့်ပုံစံ 👉 `add_mov: File_ID | ကားနာမည်` ")
@@ -144,7 +138,7 @@ def process_and_save_movie(message, file_id, caption_text):
         ep_link = f"https://t.me{bot_info.username}?start={movie_key}"
         
         reply_text = (
-            f"✅ **ဇာတ်လမ်းတွဲကို သိည်းဆည်းပြီးပါပြီ။**\n\n"
+            f"✅ **ဇာတ်လမ်းတွဲကို သိမ်းဆည်းပြီးပါပြီ။**\n\n"
             f"📺 ဇာတ်လမ်းတွဲအမည်: {series_name.upper()}\n"
             f"🎞️ အပိုင်းနံပါတ်: Ep {episode_no}\n\n"
             f"🔗 **Channel ခလုတ်တွင် ထည့်ရမည့် လင့်ခ်ချုပ် (Main Link):**\n`{main_link}`\n\n"
@@ -167,6 +161,12 @@ def process_and_save_movie(message, file_id, caption_text):
     bot.send_message(message.chat.id, reply_text, parse_mode="Markdown")
 
 if __name__ == "__main__":
-    print("Movie & Series Share Bot is running smoothly...")
+    port = int(os.environ.get('PORT', 5000))
+    
+    # Render စမောင်းမောင်းချင်း Port Bind အရင်ပွင့်စေပြီးမှ ၃ စက္ကန့်ဆိုင်းကာ Webhook ချိတ်ဆက်သည့်စနစ် (429 အမှားကျော်ရန်)
+    time.sleep(3)
     bot.remove_webhook()
-    bot.infinity_polling()
+    bot.set_webhook(url=f"{WEBAPP_URL}/{BOT_TOKEN}")
+    
+    bot.run_webhooks(listen="0.0.0.0", port=port, url_path=BOT_TOKEN)
+        
