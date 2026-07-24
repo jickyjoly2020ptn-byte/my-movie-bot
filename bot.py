@@ -7,10 +7,10 @@ from pymongo import MongoClient
 import certifi
 
 # === အချက်အလက်များ တန်းထည့်ရန် ===
-BOT_TOKEN = "8905382319:AAGCLUAZbAnspMuUTXxcFgW9b5Z3OW0NtpM"
-WEBAPP_URL = "https://onrender.com"
-ADMIN_IDS = [2043111276]
-MONGO_URI = "mongodb://botuser:jickymovie2026@ac-8w9cptn-shard-00-00.uluftrc.mongodb.net:27017,ac-8w9cptn-shard-00-01.uluftrc.mongodb.net:27017,ac-8w9cptn-shard-00-02.uluftrc.mongodb.net:27017/?ssl=true&replicaSet=atlas-m0wsp6-shard-00&authSource=admin&retryWrites=true&w=majority&appName=Cluster0"
+BOT_TOKEN = "8905382319:AAEqSc_82vcVNbC-sDV4CZ5WzXtvZbnwyMM"  # သင့် Bot Token အသစ်
+WEBAPP_URL = "https://my-movie-bot-1-ss8q.onrender.com"        # သင့် Render URL အမှန်
+ADMIN_IDS = [2043111276]                                      # သင့် Telegram User ID
+MONGO_URI = "mongodb+srv://botuser:jickymovie2026@cluster0.uluftrc.mongodb.net/?retryWrites=true&w=majority"
 
 DELETE_AFTER_SECONDS = 300 
 bot = telebot.TeleBot(BOT_TOKEN)
@@ -68,12 +68,13 @@ def search_and_send_movie(message):
     else:
         bot.send_message(chat_id, "❌ ရှာမတွေ့သေးပါဘူး။")
 
-# === Webhook စနစ်သတ်မှတ်ခြင်း ===
-time.sleep(3)
-bot.remove_webhook()
-bot.set_webhook(url=f"{WEBAPP_URL}/{BOT_TOKEN}")
-
 if __name__ == "__main__":
+    # Render Port ကို အရင်ဆုံး တန်းပွင့်စေပြီးမှ Telegram Webhook ကို အေးဆေး ချိတ်ဆက်ခြင်း (429 အမှားကျော်ရန် နေရာမှန် ပြင်ဆင်ထားပါသည်)
     port = int(os.environ.get('PORT', 5000))
+    
+    bot.remove_webhook()
+    time.sleep(2) # Port ပွင့်ပြီးမှ ၂ စက္ကန့် စောင့်ခိုင်းခြင်း
+    bot.set_webhook(url=f"{WEBAPP_URL}/{BOT_TOKEN}")
+    
     bot.run_webhooks(listen="0.0.0.0", port=port, url_path=BOT_TOKEN)
 
