@@ -72,12 +72,16 @@ def search_and_send_movie(message):
         bot.send_message(chat_id, "❌ ရှာမတွေ့သေးပါဘူး။")
 
 if __name__ == "__main__":
-    # Render Port ကို အရင်ဆုံး တန်းပွင့်စေပြီးမှ Telegram Webhook ကို အေးဆေး ချိတ်ဆက်ခြင်း (429 အမှားကျော်ရန် နေရာမှန် ပြင်ဆင်ထားပါသည်)
     port = int(os.environ.get('PORT', 5000))
     
+    time.sleep(3) 
+    
     bot.remove_webhook()
-    time.sleep(2) # Port ပွင့်ပြီးမှ ၂ စက္ကန့် စောင့်ခိုင်းခြင်း
     bot.set_webhook(url=f"{WEBAPP_URL}/{BOT_TOKEN}")
     
-    bot.run_webhooks(listen="0.0.0.0", port=port, url_path=BOT_TOKEN)
-
+    bot.run_webhooks(
+        listen="0.0.0.0",
+        port=port,
+        url_path=BOT_TOKEN
+    )
+    
