@@ -10,7 +10,7 @@ import certifi
 BOT_TOKEN = "8905382319:AAEqSc_82vcVNbC-sDV4CZ5WzXtvZbnwyMM"
 WEBAPP_URL = "https://onrender.com"
 ADMIN_IDS = [2043111276]
-MONGO_URI = "mongodb+srv://botuser:jickymovie2026@cluster0.uluftrca.mongodb.net/?appName=Cluster0"
+MONGO_URI = "mongodb://botuser:jickymovie2026@ac-8w9cptn-shard-00-00.uluftrc.mongodb.net:27017,ac-8w9cptn-shard-00-01.uluftrc.mongodb.net:27017,ac-8w9cptn-shard-00-02.uluftrc.mongodb.net:27017/?ssl=true&replicaSet=atlas-m0wsp6-shard-00&authSource=admin&retryWrites=true&w=majority&appName=Cluster0"
 
 DELETE_AFTER_SECONDS = 300 
 bot = telebot.TeleBot(BOT_TOKEN)
