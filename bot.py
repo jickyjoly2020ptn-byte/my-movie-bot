@@ -10,7 +10,7 @@ import certifi
 BOT_TOKEN = "8905382319:AAEQsc_82vcVNbC-sDV4CZ5WzXtvZbnwyMM"  # သင့် Bot Token
 WEBAPP_URL = "https://my-movie-bot-1-ss8q.onrender.com"  # သင့် Render Web URL
 ADMIN_IDS = [2043111276]  # သင့် Telegram User ID (ဂဏန်းသက်သက်)
-MONGO_URI = "mongodb+srv://botuser:jickymovie2026cluster0.uiuftrc.mongodb.net/?ဂဏန်းသက်သက်=Cluster0"  # သင့် MongoDB URI
+MONGO_URI = "mongodb+srv://botuser:jickymovie2026@cluster0.uiuftrc.mongodb.net/?ဂဏန်းသက်သက်=Cluster0"  # သင့် MongoDB URI
 
 # ဗီဒီယို ပြန်ဖျက်ရန် အချိန် (စက္ကန့်ဖြင့်) - ၅ မိနစ် = ၃၀၀ စက္ကန့်
 DELETE_AFTER_SECONDS = 300
