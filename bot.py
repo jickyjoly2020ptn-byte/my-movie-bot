@@ -9,7 +9,7 @@ import certifi
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 # === အချက်အလက်များ တန်းထည့်ရန် ===
-BOT_TOKEN = "8038762572:AAE7PpisLtlp15mLXuL5DKz9UKjPb9v4WzE"
+BOT_TOKEN = "8038762572:AAF9CE1CyYckhYufIix8yxYLx81XxZ0XXes"
 ADMIN_IDS = [2043111276]
 MONGO_URI = "mongodb://botuser:jickymovie2026@ac-8w9cptn-shard-00-00.uluftrc.mongodb.net:27017,ac-8w9cptn-shard-00-01.uluftrc.mongodb.net:27017,ac-8w9cptn-shard-00-02.uluftrc.mongodb.net:27017/?ssl=true&replicaSet=atlas-m0wsp6-shard-00&authSource=admin&retryWrites=true&w=majority&appName=Cluster0"
 
