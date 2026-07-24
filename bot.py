@@ -7,7 +7,7 @@ from pymongo import MongoClient
 import certifi
 
 # === သတ်မှတ်ချက်များ တန်းထည့်ရန် ===
-BOT_TOKEN = "8905382319:AAEQsc_82vcVNbC-sDV4CZ5WzXtvZbnwyMM"  # သင့် Bot Token
+BOT_TOKEN = "8905382319:AAF-WEX3mVz3xmUsUxzsUlXc8KO2S0Y0Eis"  # သင့် Bot Token
 WEBAPP_URL = "https://my-movie-bot-1-ss8q.onrender.com"  # သင့် Render Web URL
 ADMIN_IDS = [2043111276]  
 MONGO_URI = "mongodb+srv://botuser:jickymovie2026@cluster0.uiuftrc.mongodb.net/?ဂဏန်းသက်သက်=Cluster0"  # သင့် MongoDB URI
