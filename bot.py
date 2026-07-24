@@ -95,17 +95,8 @@ def search_and_send_movie(message):
         bot.send_message(chat_id, "❌ သင်ရှာနေသော ရုပ်ရှင် (သို့) ဇာတ်လမ်းတွဲ အပိုင်းများကို ရှာမတွေ့သေးပါဘူး။")
 
 # === Webhook စနစ်သတ်မှတ်ခြင်း ===
-import time # အပေါ်မှာ import time မပါသေးရင် ဒီလိုင်းလေး ထည့်ပေးပါ
+import time # အပေါ်မှာ import time ပါပြီးသားဆိုရင် ဒါမလိုပါ
 
-time.sleep(2) # <--- ဤလိုင်းလေးကို အတိအကျ ညှပ်ထည့်ပေးပါ (ဒါဆိုရင် 429 လုံးဝ မတက်တော့ပါဘူး)
+time.sleep(3) # <--- ဤလိုင်းလေး သေချာပေါက် ပါနေရပါမယ် (429 အမြစ်ပြတ်အောင် စောင့်ခိုင်းခြင်း)
 bot.remove_webhook()
 bot.set_webhook(url=f"{WEBAPP_URL}/{BOT_TOKEN}")
-
-if __name__ == "__main__":
-    port = int(os.environ.get('PORT', 5000))
-    bot.run_webhooks(
-        listen="0.0.0.0",
-        port=port,
-        url_path=BOT_TOKEN
-    )
-    
