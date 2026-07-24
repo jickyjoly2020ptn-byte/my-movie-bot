@@ -8,7 +8,7 @@ from pymongo import MongoClient
 import certifi
 
 # === အချက်အလက်များ တန်းထည့်ရန် ===
-BOT_TOKEN = "8038762572:AAFh_dQFbQm7yUOavGQkT1yrPXGn0A2FO_c" 
+BOT_TOKEN = "8038762572:AAHl2CXYTiz58iMrEslIwOfJHhpoUCGlHgs" 
 WEBAPP_URL = "https://onrender.com"  # သင့် Render URL အမှန်
 ADMIN_IDS = [2043111276]  # သင့် Telegram User ID ဂဏန်း
 MONGO_URI = "mongodb://botuser:jickymovie2026@ac-8w9cptn-shard-00-00.uluftrc.mongodb.net:27017,ac-8w9cptn-shard-00-01.uluftrc.mongodb.net:27017,ac-8w9cptn-shard-00-02.uluftrc.mongodb.net:27017/?ssl=true&replicaSet=atlas-m0wsp6-shard-00&authSource=admin&retryWrites=true&w=majority&appName=Cluster0"
