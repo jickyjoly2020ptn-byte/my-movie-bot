@@ -10,8 +10,10 @@ import certifi
 BOT_TOKEN = "8905382319:AAEqSc_82vcVNbC-sDV4CZ5WzXtvZbnwyMM"  # သင့် Bot Token အသစ်
 WEBAPP_URL = "https://my-movie-bot-1-ss8q.onrender.com"        # သင့် Render URL အမှန်
 ADMIN_IDS = [2043111276]                                      # သင့် Telegram User ID
-MONGO_URI = " mongodb://botuser:jickymovie2026@ac-8w9cptn-shard-00-00.uluftrc.mongodb.net:27017,ac-8w9cptn-shard-00-01.uluftrc.mongodb.net:27017,ac-8w9cptn-shard-00-02.uluftrc.mongodb.net:27017/?ssl=true&replicaSet=atlas-m0wsp6-shard-00&authSource=admin&retryWrites=true&w=majority&appName=Cluster0
-"
+host_ips = "ac-8w9cptn-shard-00-00.uluftrc.mongodb.net:27017,ac-8w9cptn-shard-00-01.uluftrc.mongodb.net:27017,ac-8w9cptn-shard-00-02.uluftrc.mongodb.net:27017"
+options = "?ssl=true&replicaSet=atlas-m0wsp6-shard-00&authSource=admin&retryWrites=true&w=majority&appName=Cluster0"
+MONGO_URI = f"mongodb://botuser:jickymovie2026@{host_ips}/{options}"
+
 
 DELETE_AFTER_SECONDS = 300 
 bot = telebot.TeleBot(BOT_TOKEN)
